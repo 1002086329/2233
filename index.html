@@ -475,6 +475,8 @@
 
     .btn-icon-label:hover { background: var(--bg); border-color: var(--border-hover); color: var(--text); }
     .btn-icon-label.success-btn:hover { background: var(--success-light); border-color: var(--success); color: var(--success); }
+    .btn-icon-label.pdf-btn { color: #C0392B; }
+    .btn-icon-label.pdf-btn:hover { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
 
     .view-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
 
@@ -839,6 +841,25 @@
     .image-preview-card:hover .image-preview-del { opacity: 1; }
     .image-preview-del:hover { background: var(--danger); }
 
+    .image-preview-edit-badge {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none;
+    }
+
+    .image-preview-card:hover .image-preview-edit-badge { opacity: 1; }
+
     .image-drop-zone {
       display: flex;
       align-items: center;
@@ -960,6 +981,276 @@
       flex-shrink: 0;
     }
 
+    /* ─── Image Editor ─── */
+    .img-editor-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 150;
+      backdrop-filter: blur(2px);
+    }
+
+    .img-editor-backdrop.open { display: flex; }
+
+    .img-editor {
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 92vw;
+      max-width: 900px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+    }
+
+    .img-editor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .img-editor-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .img-editor-title svg { width: 16px; height: 16px; color: var(--primary); }
+
+    .img-editor-close {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+
+    .img-editor-close:hover { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+
+    .img-editor-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .img-editor-sidebar {
+      width: 170px;
+      min-width: 170px;
+      border-right: 1px solid var(--border);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .img-editor-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-hint);
+      margin-bottom: 4px;
+    }
+
+    .img-editor-tool-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .img-editor-tool-btn {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.15s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .img-editor-tool-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .img-editor-tool-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
+    .img-editor-tool-btn.active:hover { background: var(--primary-dark); border-color: var(--primary-dark); color: white; }
+
+    .img-editor-slider-group { margin-bottom: 2px; }
+
+    .img-editor-slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .img-editor-slider-label span:last-child { font-weight: 500; color: var(--text); }
+
+    .img-editor-slider {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    .img-editor-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: 2px solid var(--primary-dark);
+    }
+
+    .img-editor-reset {
+      padding: 5px 10px;
+      border: 1px solid var(--danger);
+      background: transparent;
+      color: var(--danger);
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 8px;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .img-editor-reset:hover { background: var(--danger-light); }
+
+    .img-editor-preview-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1a1a;
+      position: relative;
+      overflow: hidden;
+      min-height: 320px;
+    }
+
+    .img-editor-preview-wrap {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      overflow: hidden;
+    }
+
+    .img-editor-preview-img {
+      display: block;
+      max-width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      transition: filter 0.1s, transform 0.2s;
+    }
+
+    /* Crop overlay */
+    .img-editor-crop-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .img-editor-crop-overlay.active { pointer-events: auto; cursor: crosshair; }
+
+    .img-editor-crop-box {
+      position: absolute;
+      border: 2px dashed #fff;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
+      display: none;
+      pointer-events: auto;
+    }
+
+    .img-editor-crop-box.visible { display: block; }
+
+    .img-editor-crop-handle {
+      position: absolute;
+      width: 10px; height: 10px;
+      background: #fff;
+      border: 1px solid rgba(255,255,255,0.8);
+    }
+
+    .img-editor-crop-handle.tl { top: -5px; left: -5px; cursor: nw-resize; }
+    .img-editor-crop-handle.tr { top: -5px; right: -5px; cursor: ne-resize; }
+    .img-editor-crop-handle.bl { bottom: -5px; left: -5px; cursor: sw-resize; }
+    .img-editor-crop-handle.br { bottom: -5px; right: -5px; cursor: se-resize; }
+
+    .img-editor-crop-info {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      display: none;
+    }
+
+    .img-editor-crop-info.visible { display: block; }
+
+    .img-editor-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 10px;
+    }
+
+    .img-editor-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .img-editor-nav-btn {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+
+    .img-editor-nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .img-editor-nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+    .img-editor-actions { display: flex; gap: 8px; }
+
+    .img-editor-dimensions {
+      font-size: 11px;
+      color: var(--text-hint);
+    }
+
     /* ─── Responsive ─── */
     @media (max-width: 700px) {
       .sidebar { width: 100%; position: relative; min-height: auto; }
@@ -969,6 +1260,68 @@
       .form-row { flex-direction: column; }
       .view-title { font-size: 19px; }
       .auth-card { padding: 28px 20px; margin: 16px; }
+      .img-editor { width: 96vw; max-width: 100%; }
+      .img-editor-sidebar { width: 120px; min-width: 120px; padding: 8px; }
+    }
+
+    /* ─── Print / PDF Export ─── */
+    @media print {
+      @page { margin: 2cm; size: A4; }
+      body { background: white !important; color: #2C2C2A; font-size: 13px; line-height: 1.8; }
+      body > *:not(#printArea) { display: none !important; }
+      #printArea {
+        display: block !important;
+        position: static;
+        background: white;
+        padding: 0;
+      }
+      .print-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2C2C2A;
+        margin-bottom: 8px;
+        border-bottom: 2px solid #7F77DD;
+        padding-bottom: 8px;
+      }
+      .print-meta {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 20px;
+        display: flex; gap: 16px; flex-wrap: wrap;
+      }
+      .print-meta span { display: inline-flex; align-items: center; gap: 4px; }
+      .print-body {
+        font-size: 14px;
+        line-height: 2;
+        white-space: pre-wrap;
+        margin-bottom: 20px;
+      }
+      .print-images-title {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 4px;
+      }
+      .print-images {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 30px;
+      }
+      .print-images img {
+        width: 100%;
+        border-radius: 4px;
+        page-break-inside: avoid;
+      }
+      .print-footer {
+        text-align: center;
+        font-size: 11px;
+        color: #999;
+        margin-top: 30px;
+        padding-top: 12px;
+        border-top: 1px solid #ddd;
+      }
     }
   </style>
 </head>
@@ -1154,6 +1507,16 @@
               </svg>
               保存到文件夹
             </button>
+            <!-- Export PDF -->
+            <button class="btn-icon-label pdf-btn" onclick="exportPDF()" title="导出为 PDF">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <polyline points="9 15 12 12 15 15"/>
+              </svg>
+              导出 PDF
+            </button>
             <!-- Download -->
             <button class="btn-icon" onclick="downloadCurrentEntry()" title="下载为 .txt">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1325,6 +1688,106 @@
   <button class="lightbox-nav lightbox-prev" id="lightboxPrev" onclick="event.stopPropagation(); lightboxNavigate(-1)">‹</button>
   <img id="lightboxImg" src="" alt="" onclick="event.stopPropagation()">
   <button class="lightbox-nav lightbox-next" id="lightboxNext" onclick="event.stopPropagation(); lightboxNavigate(1)">›</button>
+</div>
+
+<!-- Image Editor Modal -->
+<div class="img-editor-backdrop" id="imgEditorBackdrop">
+  <div class="img-editor">
+    <!-- Header -->
+    <div class="img-editor-header">
+      <div class="img-editor-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        图片编辑器
+      </div>
+      <button class="img-editor-close" onclick="closeImageEditor()">✕</button>
+    </div>
+
+    <!-- Body -->
+    <div class="img-editor-body">
+      <!-- Sidebar -->
+      <div class="img-editor-sidebar">
+        <div class="img-editor-section-label">变换</div>
+        <div class="img-editor-tool-row">
+          <button class="img-editor-tool-btn" onclick="editorRotate(-90)" title="逆时针旋转 90°">↺ 左转</button>
+          <button class="img-editor-tool-btn" onclick="editorRotate(90)" title="顺时针旋转 90°">↻ 右转</button>
+        </div>
+        <div class="img-editor-tool-row">
+          <button class="img-editor-tool-btn" onclick="editorFlip('h')" title="水平翻转">↔ 水平</button>
+          <button class="img-editor-tool-btn" onclick="editorFlip('v')" title="垂直翻转">↕ 垂直</button>
+        </div>
+        <button class="img-editor-tool-btn" id="editorCropBtn" onclick="editorToggleCrop()" title="自由裁剪">✂ 裁剪</button>
+
+        <div style="margin-top:8px"></div>
+        <div class="img-editor-section-label">调整</div>
+
+        <div class="img-editor-slider-group">
+          <div class="img-editor-slider-label"><span>亮度</span><span id="editorBrightVal">100</span></div>
+          <input type="range" class="img-editor-slider" id="editorBrightness" min="0" max="200" value="100" oninput="editorUpdateSlider('brightness',this.value)">
+        </div>
+
+        <div class="img-editor-slider-group">
+          <div class="img-editor-slider-label"><span>对比度</span><span id="editorContrastVal">100</span></div>
+          <input type="range" class="img-editor-slider" id="editorContrast" min="0" max="200" value="100" oninput="editorUpdateSlider('contrast',this.value)">
+        </div>
+
+        <div class="img-editor-slider-group">
+          <div class="img-editor-slider-label"><span>饱和度</span><span id="editorSaturateVal">100</span></div>
+          <input type="range" class="img-editor-slider" id="editorSaturation" min="0" max="200" value="100" oninput="editorUpdateSlider('saturation',this.value)">
+        </div>
+
+        <div class="img-editor-slider-group">
+          <div class="img-editor-slider-label"><span>模糊</span><span id="editorBlurVal">0</span></div>
+          <input type="range" class="img-editor-slider" id="editorBlur" min="0" max="20" value="0" oninput="editorUpdateSlider('blur',this.value)">
+        </div>
+
+        <button class="img-editor-reset" onclick="editorResetAll()">🔄 重置全部</button>
+      </div>
+
+      <!-- Preview Area -->
+      <div class="img-editor-preview-area" id="editorPreviewArea">
+        <div class="img-editor-preview-wrap" id="editorPreviewWrap">
+          <img class="img-editor-preview-img" id="editorPreviewImg" src="" alt="预览">
+          <div class="img-editor-crop-overlay" id="editorCropOverlay">
+            <div class="img-editor-crop-box" id="editorCropBox">
+              <div class="img-editor-crop-handle tl" data-handle="tl"></div>
+              <div class="img-editor-crop-handle tr" data-handle="tr"></div>
+              <div class="img-editor-crop-handle bl" data-handle="bl"></div>
+              <div class="img-editor-crop-handle br" data-handle="br"></div>
+            </div>
+          </div>
+          <div class="img-editor-crop-info" id="editorCropInfo"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="img-editor-footer">
+      <div class="img-editor-nav">
+        <button class="img-editor-nav-btn" id="editorPrevBtn" onclick="editorNavigate(-1)" title="上一张">‹</button>
+        <span id="editorNavInfo">1 / 1</span>
+        <button class="img-editor-nav-btn" id="editorNextBtn" onclick="editorNavigate(1)" title="下一张">›</button>
+      </div>
+      <div class="img-editor-dimensions" id="editorDimInfo"></div>
+      <div class="img-editor-actions">
+        <button class="btn" onclick="editorCancelCrop()" id="editorCancelCropBtn" style="display:none">取消裁剪</button>
+        <button class="btn" onclick="editorApplyCrop()" id="editorApplyCropBtn" style="display:none;background:var(--primary);color:white;border-color:var(--primary)">应用裁剪</button>
+        <button class="btn" onclick="closeImageEditor()">取消</button>
+        <button class="btn btn-primary" onclick="saveImageEdit()">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print / PDF Export Area -->
+<div id="printArea" style="display:none">
+  <div class="print-title" id="printTitle"></div>
+  <div class="print-meta" id="printMeta"></div>
+  <div class="print-body" id="printBody"></div>
+  <div class="print-images-title" id="printImagesTitle"></div>
+  <div class="print-images" id="printImages"></div>
+  <div class="print-footer">
+    导出自「我的日记本」 · <span id="printUser"></span>
+  </div>
 </div>
 
 <script>
@@ -1757,8 +2220,224 @@ function highlight(html, query) {
 }
 
 // ══════════════════════════════════════════════════════
-// VIEW ENTRY
+// PDF EXPORT (programmatic via html2canvas + jsPDF)
 // ══════════════════════════════════════════════════════
+let pdfLibsReady = false;
+let pdfLibsLoading = false;
+
+function loadPDFLibs() {
+  return new Promise((resolve) => {
+    if (pdfLibsReady) { resolve(true); return; }
+    if (pdfLibsLoading) {
+      // Wait for in-progress load
+      const check = setInterval(() => { if (pdfLibsReady) { clearInterval(check); resolve(true); } }, 100);
+      setTimeout(() => { clearInterval(check); resolve(false); }, 15000);
+      return;
+    }
+    pdfLibsLoading = true;
+
+    const loadJs = (src) => new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = res;
+      s.onerror = rej;
+      document.head.appendChild(s);
+    });
+
+    Promise.all([
+      loadJs('https://html2canvas.hertzen.com/dist/html2canvas.min.js'),
+      loadJs('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+    ]).then(() => {
+      pdfLibsReady = true;
+      pdfLibsLoading = false;
+      resolve(true);
+    }).catch(() => {
+      pdfLibsLoading = false;
+      resolve(false);
+    });
+  });
+}
+
+async function generatePDFBlob(entry) {
+  const printArea = document.getElementById('printArea');
+
+  // Title
+  document.getElementById('printTitle').textContent = entry.title || '(无标题)';
+
+  // Meta
+  let metaHtml = '';
+  metaHtml += `<span>📅 ${entry.date}</span>`;
+  if (entry.mood) {
+    const moodEmojis = { happy: '😊 开心', calm: '😌 平静', sad: '😢 难过', angry: '😡 生气', excited: '🤩 兴奋', anxious: '😰 焦虑' };
+    metaHtml += `<span>${moodEmojis[entry.mood] || entry.mood}</span>`;
+  }
+  if (entry.weather) metaHtml += `<span>🌤 ${entry.weather}</span>`;
+  if (entry.tags && entry.tags.length > 0) metaHtml += `<span>🏷 ${entry.tags.join(' · ')}</span>`;
+  document.getElementById('printMeta').innerHTML = metaHtml;
+
+  // Body
+  document.getElementById('printBody').textContent = entry.body || '(没有内容)';
+
+  // Images
+  const imagesTitle = document.getElementById('printImagesTitle');
+  const imagesContainer = document.getElementById('printImages');
+  if (entry.images && entry.images.length > 0) {
+    imagesTitle.textContent = `📷 图片（共 ${entry.images.length} 张）`;
+    imagesTitle.style.display = '';
+    imagesContainer.innerHTML = entry.images.map(url => `<img src="${esc(url)}" alt="图片" style="max-width:280px">`).join('');
+    imagesContainer.style.display = '';
+  } else {
+    imagesTitle.style.display = 'none';
+    imagesContainer.style.display = 'none';
+  }
+
+  // Footer
+  document.getElementById('printUser').textContent = currentUser ? (currentUser.nickname || currentUser.username) : '';
+
+  // Show temporarily for html2canvas capture
+  printArea.style.display = 'block';
+  printArea.style.position = 'absolute';
+  printArea.style.left = '0';
+  printArea.style.top = '0';
+  printArea.style.width = '794px'; // A4 width at 96dpi
+  printArea.style.padding = '60px 56px';
+  printArea.style.background = '#ffffff';
+  printArea.style.zIndex = '-1';
+  printArea.style.visibility = 'visible';
+
+  // Wait for images to load
+  await new Promise(r => setTimeout(r, 300));
+
+  // Render with html2canvas
+  const canvas = await html2canvas(printArea, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#ffffff',
+    logging: false
+  });
+
+  // Hide again
+  printArea.style.display = 'none';
+  printArea.style.position = '';
+  printArea.style.left = '';
+  printArea.style.top = '';
+  printArea.style.width = '';
+  printArea.style.padding = '';
+  printArea.style.background = '';
+  printArea.style.zIndex = '';
+  printArea.style.visibility = '';
+
+  // Generate PDF with jsPDF
+  const { jsPDF } = window.jspdf;
+  const imgData = canvas.toDataURL('image/jpeg', 0.92);
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+  pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  return pdf.output('blob');
+}
+
+async function exportPDF() {
+  const entry = entries.find(e => e.id === currentId);
+  if (!entry) { showToast('请先选择一篇日记', 'amber'); return; }
+
+  // Load PDF libraries on first use
+  const libsOk = await loadPDFLibs();
+  if (!libsOk) {
+    // Fallback to browser print
+    showToast('PDF 库加载失败，将使用浏览器打印功能', 'amber');
+    fallbackPrintPDF(entry);
+    return;
+  }
+
+  showToast('正在生成 PDF...');
+
+  try {
+    const blob = await generatePDFBlob(entry);
+    const d = new Date(entry.date + 'T00:00:00');
+    const datePart = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const fileName = `${datePart}_${safeFileName(entry.title || '日记')}.pdf`;
+
+    // Save to bound folder if available
+    if (savedDirHandle && window.showDirectoryPicker) {
+      try {
+        const fileHandle = await savedDirHandle.getFileHandle(fileName, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        showToast(`PDF 已保存到绑定文件夹：${fileName}`, 'success');
+      } catch (e) {
+        console.warn('写入文件夹失败:', e);
+        showToast('写入文件夹失败，已触发下载', 'amber');
+        triggerDownloadBlob(blob, fileName);
+      }
+    } else {
+      triggerDownloadBlob(blob, fileName);
+      showToast('PDF 已下载', 'success');
+    }
+  } catch (e) {
+    console.error('PDF 生成失败:', e);
+    showToast('PDF 生成失败，尝试浏览器打印…', 'amber');
+    fallbackPrintPDF(entry);
+  }
+}
+
+function triggerDownloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function fallbackPrintPDF(entry) {
+  const printArea = document.getElementById('printArea');
+  document.getElementById('printTitle').textContent = entry.title || '(无标题)';
+  let metaHtml = '';
+  metaHtml += `<span>📅 ${entry.date}</span>`;
+  if (entry.mood) {
+    const moodEmojis = { happy: '😊 开心', calm: '😌 平静', sad: '😢 难过', angry: '😡 生气', excited: '🤩 兴奋', anxious: '😰 焦虑' };
+    metaHtml += `<span>${moodEmojis[entry.mood] || entry.mood}</span>`;
+  }
+  if (entry.weather) metaHtml += `<span>🌤 ${entry.weather}</span>`;
+  if (entry.tags && entry.tags.length > 0) metaHtml += `<span>🏷 ${entry.tags.join(' · ')}</span>`;
+  document.getElementById('printMeta').innerHTML = metaHtml;
+  document.getElementById('printBody').textContent = entry.body || '(没有内容)';
+  const imagesTitle = document.getElementById('printImagesTitle');
+  const imagesContainer = document.getElementById('printImages');
+  if (entry.images && entry.images.length > 0) {
+    imagesTitle.textContent = `📷 图片（共 ${entry.images.length} 张）`;
+    imagesTitle.style.display = '';
+    imagesContainer.innerHTML = entry.images.map(url => `<img src="${esc(url)}" alt="图片">`).join('');
+    imagesContainer.style.display = '';
+  } else {
+    imagesTitle.style.display = 'none';
+    imagesContainer.style.display = 'none';
+  }
+  document.getElementById('printUser').textContent = currentUser ? (currentUser.nickname || currentUser.username) : '';
+  printArea.style.display = 'block';
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { printArea.style.display = 'none'; }, 600);
+  }, 200);
+}
 function viewEntry(id) {
   currentId = id;
   const e = entries.find(x => x.id === id);
@@ -2025,9 +2704,12 @@ function renderEditImages() {
   const grid = document.getElementById('editImageGrid');
   let html = '';
   editImages.forEach((dataUrl, i) => {
-    html += `<div class="image-preview-card" onclick="openLightbox(editImages, ${i})">
+    html += `<div class="image-preview-card" onclick="openImageEditor(${i})" title="点击编辑图片">
       <img src="${esc(dataUrl)}" alt="图片${i+1}" loading="lazy">
       <button class="image-preview-del" onclick="event.stopPropagation();removeEditImage(${i})" title="移除">×</button>
+      <div class="image-preview-edit-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
     </div>`;
   });
   if (editImages.length < MAX_IMAGES) {
@@ -2140,7 +2822,444 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowRight') { lightboxNavigate(1); return; }
 });
 
-// ─── View gallery generation ───
+// ══════════════════════════════════════════════════════
+// IMAGE EDITOR
+// ══════════════════════════════════════════════════════
+let editorIndex = -1;
+let editorRotation = 0;
+let editorFlipH = false;
+let editorFlipV = false;
+let editorBrightness = 100;
+let editorContrast = 100;
+let editorSaturation = 100;
+let editorBlur = 0;
+let editorCropActive = false;
+let editorCropRect = null;
+let editorCropStart = null;
+let editorCropDragging = false;
+let editorCropResizing = false;
+let editorCropHandle = '';
+
+function openImageEditor(index) {
+  if (index < 0 || index >= editImages.length) return;
+  editorIndex = index;
+
+  // Reset all state
+  editorRotation = 0;
+  editorFlipH = false;
+  editorFlipV = false;
+  editorBrightness = 100;
+  editorContrast = 100;
+  editorSaturation = 100;
+  editorBlur = 0;
+  editorCropActive = false;
+  editorCropRect = null;
+
+  // Reset UI
+  document.getElementById('editorBrightness').value = 100;
+  document.getElementById('editorContrast').value = 100;
+  document.getElementById('editorSaturation').value = 100;
+  document.getElementById('editorBlur').value = 0;
+  document.getElementById('editorBrightVal').textContent = '100';
+  document.getElementById('editorContrastVal').textContent = '100';
+  document.getElementById('editorSaturateVal').textContent = '100';
+  document.getElementById('editorBlurVal').textContent = '0';
+  document.getElementById('editorCropBtn').classList.remove('active');
+  hideEditorCropUI();
+
+  // Load image
+  const img = document.getElementById('editorPreviewImg');
+  img.src = editImages[index];
+  img.onload = function() {
+    updateEditorNav();
+    updateEditorDimensions();
+  };
+
+  // Update preview CSS
+  applyEditorPreview();
+
+  // Show modal
+  document.getElementById('imgEditorBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeImageEditor() {
+  document.getElementById('imgEditorBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+  editorIndex = -1;
+  editorCropActive = false;
+}
+
+function applyEditorPreview() {
+  const img = document.getElementById('editorPreviewImg');
+  const transforms = [];
+  if (editorRotation !== 0) transforms.push('rotate(' + editorRotation + 'deg)');
+  if (editorFlipH) transforms.push('scaleX(-1)');
+  if (editorFlipV) transforms.push('scaleY(-1)');
+  img.style.transform = transforms.length > 0 ? transforms.join(' ') : 'none';
+
+  const filters = [];
+  filters.push('brightness(' + editorBrightness + '%)');
+  filters.push('contrast(' + editorContrast + '%)');
+  filters.push('saturate(' + editorSaturation + '%)');
+  if (editorBlur > 0) filters.push('blur(' + editorBlur + 'px)');
+  img.style.filter = filters.join(' ');
+}
+
+function editorRotate(deg) {
+  editorRotation = (editorRotation + deg) % 360;
+  if (editorRotation < 0) editorRotation += 360;
+  if (editorCropActive) { editorCropRect = null; renderCropBox(); }
+  applyEditorPreview();
+}
+
+function editorFlip(axis) {
+  if (axis === 'h') editorFlipH = !editorFlipH;
+  if (axis === 'v') editorFlipV = !editorFlipV;
+  applyEditorPreview();
+}
+
+function editorUpdateSlider(type, val) {
+  val = parseInt(val);
+  switch (type) {
+    case 'brightness': editorBrightness = val; document.getElementById('editorBrightVal').textContent = val; break;
+    case 'contrast': editorContrast = val; document.getElementById('editorContrastVal').textContent = val; break;
+    case 'saturation': editorSaturation = val; document.getElementById('editorSaturateVal').textContent = val; break;
+    case 'blur': editorBlur = val; document.getElementById('editorBlurVal').textContent = val; break;
+  }
+  applyEditorPreview();
+}
+
+function editorResetAll() {
+  editorRotation = 0;
+  editorFlipH = false;
+  editorFlipV = false;
+  editorBrightness = 100;
+  editorContrast = 100;
+  editorSaturation = 100;
+  editorBlur = 0;
+  editorCropActive = false;
+  editorCropRect = null;
+
+  document.getElementById('editorBrightness').value = 100;
+  document.getElementById('editorContrast').value = 100;
+  document.getElementById('editorSaturation').value = 100;
+  document.getElementById('editorBlur').value = 0;
+  document.getElementById('editorBrightVal').textContent = '100';
+  document.getElementById('editorContrastVal').textContent = '100';
+  document.getElementById('editorSaturateVal').textContent = '100';
+  document.getElementById('editorBlurVal').textContent = '0';
+  document.getElementById('editorCropBtn').classList.remove('active');
+  hideEditorCropUI();
+
+  applyEditorPreview();
+}
+
+// ─── Crop ───
+function editorToggleCrop() {
+  editorCropActive = !editorCropActive;
+  const btn = document.getElementById('editorCropBtn');
+  if (editorCropActive) {
+    btn.classList.add('active');
+    editorCropRect = null;
+    document.getElementById('editorCropOverlay').classList.add('active');
+    showEditorCropUI();
+  } else {
+    btn.classList.remove('active');
+    document.getElementById('editorCropOverlay').classList.remove('active');
+    hideEditorCropUI();
+  }
+  renderCropBox();
+}
+
+function showEditorCropUI() {
+  document.getElementById('editorCancelCropBtn').style.display = '';
+  document.getElementById('editorApplyCropBtn').style.display = '';
+}
+
+function hideEditorCropUI() {
+  document.getElementById('editorCancelCropBtn').style.display = 'none';
+  document.getElementById('editorApplyCropBtn').style.display = 'none';
+  document.getElementById('editorCropBox').classList.remove('visible');
+  document.getElementById('editorCropInfo').classList.remove('visible');
+}
+
+function editorCancelCrop() {
+  editorCropActive = false;
+  editorCropRect = null;
+  document.getElementById('editorCropBtn').classList.remove('active');
+  document.getElementById('editorCropOverlay').classList.remove('active');
+  hideEditorCropUI();
+  renderCropBox();
+}
+
+function editorApplyCrop() {
+  if (!editorCropRect || editorCropRect.w < 10 || editorCropRect.h < 10) {
+    showToast('请先拖拽选择裁剪区域', 'amber');
+    return;
+  }
+  // The crop will be applied when saving - we just exit crop mode
+  editorCropActive = false;
+  document.getElementById('editorCropBtn').classList.remove('active');
+  document.getElementById('editorCropOverlay').classList.remove('active');
+  hideEditorCropUI();
+  renderCropBox();
+  showToast('裁剪区域已选定，点击「确认」生效', 'success');
+}
+
+function renderCropBox() {
+  const box = document.getElementById('editorCropBox');
+  const info = document.getElementById('editorCropInfo');
+  if (!editorCropActive || !editorCropRect) {
+    box.classList.remove('visible');
+    info.classList.remove('visible');
+    return;
+  }
+  const r = editorCropRect;
+  box.style.left = r.x + 'px';
+  box.style.top = r.y + 'px';
+  box.style.width = r.w + 'px';
+  box.style.height = r.h + 'px';
+  box.classList.add('visible');
+
+  const img = document.getElementById('editorPreviewImg');
+  const scaleX = img.naturalWidth / img.clientWidth;
+  const scaleY = img.naturalHeight / img.clientHeight;
+  const cropW = Math.round(r.w * scaleX);
+  const cropH = Math.round(r.h * scaleY);
+  info.textContent = cropW + ' × ' + cropH;
+  info.classList.add('visible');
+}
+
+// Crop mouse handlers on the overlay
+document.addEventListener('DOMContentLoaded', function() {
+  const overlay = document.getElementById('editorCropOverlay');
+
+  overlay.addEventListener('mousedown', function(e) {
+    if (!editorCropActive) return;
+    const target = e.target;
+    if (target.classList.contains('img-editor-crop-handle')) {
+      editorCropResizing = true;
+      editorCropHandle = target.dataset.handle;
+      editorCropStart = { x: e.clientX, y: e.clientY, origRect: Object.assign({}, editorCropRect) };
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    if (target === overlay || target.closest('.img-editor-crop-box')) {
+      // Check if clicking inside existing crop box - start drag
+      if (editorCropRect && isInsideCropRect(e)) {
+        editorCropDragging = true;
+        editorCropStart = { x: e.clientX, y: e.clientY, rectX: editorCropRect.x, rectY: editorCropRect.y };
+        e.preventDefault();
+        return;
+      }
+    }
+    // Start new crop
+    const wrap = document.getElementById('editorPreviewWrap');
+    const wrapRect = wrap.getBoundingClientRect();
+    editorCropStart = {
+      x: e.clientX - wrapRect.left,
+      y: e.clientY - wrapRect.top,
+      clientX: e.clientX,
+      clientY: e.clientY
+    };
+    editorCropRect = null;
+    editorCropDragging = true;
+    editorCropResizing = false;
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', function(e) {
+    if (!editorCropActive) return;
+    const wrap = document.getElementById('editorPreviewWrap');
+    const wrapRect = wrap.getBoundingClientRect();
+
+    if (editorCropResizing && editorCropRect && editorCropStart) {
+      const dx = e.clientX - editorCropStart.x;
+      const dy = e.clientY - editorCropStart.y;
+      const orig = editorCropStart.origRect;
+      const r = editorCropRect;
+      switch (editorCropHandle) {
+        case 'tl':
+          r.x = Math.max(0, Math.min(orig.x + orig.w - 20, orig.x + dx));
+          r.y = Math.max(0, Math.min(orig.y + orig.h - 20, orig.y + dy));
+          r.w = orig.w - (r.x - orig.x);
+          r.h = orig.h - (r.y - orig.y);
+          break;
+        case 'tr':
+          r.y = Math.max(0, Math.min(orig.y + orig.h - 20, orig.y + dy));
+          r.w = Math.max(20, Math.min(wrapRect.width - orig.x, orig.w + dx));
+          r.h = orig.h - (r.y - orig.y);
+          break;
+        case 'bl':
+          r.x = Math.max(0, Math.min(orig.x + orig.w - 20, orig.x + dx));
+          r.w = orig.w - (r.x - orig.x);
+          r.h = Math.max(20, Math.min(wrapRect.height - orig.y, orig.h + dy));
+          break;
+        case 'br':
+          r.w = Math.max(20, Math.min(wrapRect.width - orig.x, orig.w + dx));
+          r.h = Math.max(20, Math.min(wrapRect.height - orig.y, orig.h + dy));
+          break;
+      }
+      applyEditorPreview();
+      renderCropBox();
+      return;
+    }
+
+    if (editorCropDragging && editorCropStart) {
+      if (editorCropRect && editorCropStart.rectX !== undefined) {
+        // Moving existing crop box
+        const dx = e.clientX - editorCropStart.x;
+        const dy = e.clientY - editorCropStart.y;
+        editorCropRect.x = Math.max(0, Math.min(wrapRect.width - editorCropRect.w, editorCropStart.rectX + dx));
+        editorCropRect.y = Math.max(0, Math.min(wrapRect.height - editorCropRect.h, editorCropStart.rectY + dy));
+      } else {
+        // Creating new crop box
+        const cx = e.clientX - wrapRect.left;
+        const cy = e.clientY - wrapRect.top;
+        const x1 = Math.max(0, Math.min(editorCropStart.x, cx));
+        const y1 = Math.max(0, Math.min(editorCropStart.y, cy));
+        const x2 = Math.min(wrapRect.width, Math.max(editorCropStart.x, cx));
+        const y2 = Math.min(wrapRect.height, Math.max(editorCropStart.y, cy));
+        editorCropRect = { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+      }
+      renderCropBox();
+    }
+  });
+
+  window.addEventListener('mouseup', function() {
+    if (editorCropDragging || editorCropResizing) {
+      editorCropDragging = false;
+      editorCropResizing = false;
+      editorCropStart = null;
+    }
+  });
+
+  function isInsideCropRect(e) {
+    if (!editorCropRect) return false;
+    const wrap = document.getElementById('editorPreviewWrap');
+    const wrapRect = wrap.getBoundingClientRect();
+    const mx = e.clientX - wrapRect.left;
+    const my = e.clientY - wrapRect.top;
+    return mx >= editorCropRect.x && mx <= editorCropRect.x + editorCropRect.w &&
+           my >= editorCropRect.y && my <= editorCropRect.y + editorCropRect.h;
+  }
+});
+
+// ─── Navigation between images ───
+function editorNavigate(dir) {
+  const newIdx = editorIndex + dir;
+  if (newIdx < 0 || newIdx >= editImages.length) return;
+  openImageEditor(newIdx);
+}
+
+function updateEditorNav() {
+  document.getElementById('editorPrevBtn').disabled = editorIndex <= 0;
+  document.getElementById('editorNextBtn').disabled = editorIndex >= editImages.length - 1;
+  document.getElementById('editorNavInfo').textContent = (editorIndex + 1) + ' / ' + editImages.length;
+}
+
+function updateEditorDimensions() {
+  const img = document.getElementById('editorPreviewImg');
+  document.getElementById('editorDimInfo').textContent = img.naturalWidth + ' × ' + img.naturalHeight;
+}
+
+// ─── Save (apply all edits and bake into data URL) ───
+function saveImageEdit() {
+  if (editorIndex < 0 || editorIndex >= editImages.length) return;
+
+  const imgEl = document.getElementById('editorPreviewImg');
+  if (!imgEl.complete || !imgEl.naturalWidth) { showToast('图片未加载完成', 'amber'); return; }
+
+  const hasEdits = editorRotation !== 0 || editorFlipH || editorFlipV ||
+    editorBrightness !== 100 || editorContrast !== 100 || editorSaturation !== 100 ||
+    editorBlur > 0 || (editorCropRect && editorCropRect.w >= 10 && editorCropRect.h >= 10);
+
+  if (!hasEdits) {
+    closeImageEditor();
+    return;
+  }
+
+  try {
+    // Create offscreen canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let srcW = imgEl.naturalWidth;
+    let srcH = imgEl.naturalHeight;
+
+    // Determine crop in source coordinates
+    let cropSX = 0, cropSY = 0, cropSW = srcW, cropSH = srcH;
+    if (editorCropRect && editorCropRect.w >= 10 && editorCropRect.h >= 10) {
+      const scaleX = srcW / imgEl.clientWidth;
+      const scaleY = srcH / imgEl.clientHeight;
+      cropSX = Math.round(editorCropRect.x * scaleX);
+      cropSY = Math.round(editorCropRect.y * scaleY);
+      cropSW = Math.round(editorCropRect.w * scaleX);
+      cropSH = Math.round(editorCropRect.h * scaleY);
+      cropSX = Math.max(0, Math.min(srcW - 1, cropSX));
+      cropSY = Math.max(0, Math.min(srcH - 1, cropSY));
+      cropSW = Math.min(srcW - cropSX, cropSW);
+      cropSH = Math.min(srcH - cropSY, cropSH);
+    }
+
+    // Calculate canvas size after rotation
+    let cw = cropSW, ch = cropSH;
+    if (editorRotation === 90 || editorRotation === 270) {
+      cw = cropSH; ch = cropSW;
+    }
+    canvas.width = cw;
+    canvas.height = ch;
+
+    // Build filter string
+    let filterStr = '';
+    if (editorBrightness !== 100) filterStr += 'brightness(' + editorBrightness + '%) ';
+    if (editorContrast !== 100) filterStr += 'contrast(' + editorContrast + '%) ';
+    if (editorSaturation !== 100) filterStr += 'saturate(' + editorSaturation + '%) ';
+    if (editorBlur > 0) filterStr += 'blur(' + editorBlur + 'px) ';
+    ctx.filter = filterStr.trim() || 'none';
+
+    // Apply rotation and flip transform
+    ctx.save();
+    ctx.translate(cw / 2, ch / 2);
+
+    if (editorRotation === 90) {
+      ctx.rotate(Math.PI / 2);
+      if (editorFlipH) ctx.scale(-1, 1);
+      if (editorFlipV) ctx.scale(1, -1);
+    } else if (editorRotation === 180) {
+      ctx.rotate(Math.PI);
+      if (editorFlipH) ctx.scale(-1, 1);
+      if (editorFlipV) ctx.scale(1, -1);
+    } else if (editorRotation === 270) {
+      ctx.rotate(-Math.PI / 2);
+      if (editorFlipH) ctx.scale(-1, 1);
+      if (editorFlipV) ctx.scale(1, -1);
+    } else {
+      if (editorFlipH) ctx.scale(-1, 1);
+      if (editorFlipV) ctx.scale(1, -1);
+    }
+
+    // Draw cropped portion centered
+    ctx.drawImage(imgEl, cropSX, cropSY, cropSW, cropSH, -cropSW / 2, -cropSH / 2, cropSW, cropSH);
+    ctx.restore();
+
+    // Compress output
+    const dataUrl = canvas.toDataURL('image/jpeg', IMAGE_QUALITY);
+
+    // Replace in editImages
+    editImages[editorIndex] = dataUrl;
+    renderEditImages();
+
+    showToast('图片编辑已应用', 'success');
+  } catch (e) {
+    console.error('编辑图片失败:', e);
+    showToast('编辑失败，请重试', 'danger');
+  }
+
+  closeImageEditor();
+}
 function renderViewGallery(images) {
   const gallery = document.getElementById('viewGallery');
   if (!images || images.length === 0) {
@@ -2353,6 +3472,11 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('entryEdit').classList.contains('visible')) saveEntry();
   }
   if (e.key === 'Escape') {
+    // Image editor: cancel crop first, then close
+    if (document.getElementById('imgEditorBackdrop').classList.contains('open')) {
+      if (editorCropActive) { editorCancelCrop(); return; }
+      closeImageEditor(); return;
+    }
     if (document.getElementById('lightbox').classList.contains('open')) {
       closeLightbox(); return;
     }
@@ -2366,12 +3490,23 @@ document.addEventListener('keydown', e => {
     }
     if (document.getElementById('entryEdit').classList.contains('visible')) cancelEdit();
   }
+  // Image editor: arrow keys navigate
+  if (document.getElementById('imgEditorBackdrop').classList.contains('open')) {
+    if (e.key === 'ArrowLeft') { editorNavigate(-1); return; }
+    if (e.key === 'ArrowRight') { editorNavigate(1); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { saveImageEdit(); return; }
+  }
 });
 
 document.querySelectorAll('.modal-backdrop').forEach(el => {
   el.addEventListener('click', function(e) {
     if (e.target === this) this.classList.remove('open');
   });
+});
+
+// Close image editor on backdrop click
+document.getElementById('imgEditorBackdrop').addEventListener('click', function(e) {
+  if (e.target === this) closeImageEditor();
 });
 
 // ══════════════════════════════════════════════════════
